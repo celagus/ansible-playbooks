@@ -1,0 +1,24 @@
+### Playbook to check a downloaded file integrity
+### Created by Agustin Celano, distributed to community under Apache v2.0 License
+###
+---
+- hosts: HOSTS_INVENTORY_NAME
+  gather_facts: yes
+#  become: yes  ##IF NEEDED
+  ignore_errors: yes
+  vars:
+    ansible_user: root
+    ansible_password: PASS
+#    ansible_ssh_private_key_file: "/KEY-FILE-REPO/RSA-KEY" ##IF NEEDED
+    ansible_python_interpreter: /usr/bin/python
+#    ansible_become_password: PASS  ##IF NEEDED
+  tasks:
+    - name: Set MD5 comparisson  file
+      set_fact:
+        md5_value: "{{ lookup('file', '/etc/ansible/7zip.md5') }}"
+    - name: Check for integrity
+      get_url:
+        url: https://www.7-zip.org/a/7z1902.exe
+        dest: /home/vagrant/7z1902.exe
+        checksum: "md5:{{ md5_value }}"
+        force: true
