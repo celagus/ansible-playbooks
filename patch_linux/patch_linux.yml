@@ -31,7 +31,4 @@
     template:
       src: 'templates/50unattended-upgrades'
       dest: '/etc/apt/apt.conf.d/50unattended-upgrades'
-  - name: Patchem all (Debian-based)
-    command: 'unattended-upgrade'
-    when: ansible_os_family == 'Debian'
 
