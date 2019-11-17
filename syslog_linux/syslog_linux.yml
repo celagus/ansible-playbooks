@@ -1,0 +1,44 @@
+### Playbook to setup rsyslog service in Linux Debian-based and RHEL-based OS's
+### Created by Agustin Celano, distributed to community under Apache v2.0 License
+###
+---
+- hosts: HOSTS_INVENTORY_NAME
+  gather_facts: yes
+#  become: yes  ##IF NEEDED
+  ignore_errors: yes
+  vars:
+    ansible_user: root
+    ansible_password: PASS
+#    ansible_ssh_private_key_file: "/KEY-FILE-REPO/RSA-KEY" ##IF NEEDED
+    ansible_python_interpreter: /usr/bin/python
+#    ansible_become_password: PASS  ##IF NEEDED
+  tasks:
+    - name:  Check if rsyslog package is installed else install in RHEL-based
+      yum:
+        name: rsyslog
+        state: present
+      when: ansible_os_family == 'RedHat'
+    - name: Config syslog RHEL-based
+      lineinfile:
+        path: /etc/rsyslog.conf
+        state: present
+        regexp: '.*10.20.30.40:514$'
+        line: "*.*@10.20.30.40:514"
+      when: ansible_os_family == 'RedHat'
+      notify:  restart rsyslog
+    - name:  Check if rsyslog package is installed else install in Debian-based
+      apt:
+        name: rsyslog
+        state: present
+      when: ansible_os_family == 'Debian'
+    - name: Config syslog Debian-based
+      lineinfile:
+        path: /etc/rsyslog.d/50-default.conf
+        state: present
+        regexp: '.*10.20.30.40:514$'
+        line: "*.*@10.20.30.40:514"
+      when: ansible_os_family == 'Debian'
+      notify: restart rsyslog
+  handlers:
+    - name: restart rsyslog
+      service: name=rsyslog state=restarted

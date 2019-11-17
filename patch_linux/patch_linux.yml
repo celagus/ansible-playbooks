@@ -1,0 +1,37 @@
+### Playbook to patch security issues for packages in Linux Debian-based and RHEL-based OS's
+### Created by Agustin Celano, distributed to community under Apache v2.0 License
+###
+---
+- hosts: HOSTS_INVENTORY_NAME
+  become: yes
+  diff: yes
+  vars:
+#    ansible_ssh_private_key_file: "/etc/ansible/RSA-KEY"  ## JUST IF SSH PRIV KEY IS NEEDED
+    ansible_user: root
+    ansible_password: PASS
+#    ansible_become_pass: PASS  ##IF SUDO IS  NEEDED
+  tasks:
+  - name: Yum upgrade
+    yum:
+     name: yum
+     state: latest
+    when: ansible_os_family == 'RedHat'
+  - name: Patchem all (RedHat-based)
+    yum:
+     name: '*'
+     security: yes
+     state: latest
+    when: ansible_os_family == 'RedHat'
+  - name: Get and install unattended-upgrades in Debian-based Linux
+    apt:
+     name: unattended-upgrades
+     state: present
+    when: ansible_os_family == 'Debian'
+  - name: Configure unattended-upgrades
+    template:
+      src: 'templates/50unattended-upgrades'
+      dest: '/etc/apt/apt.conf.d/50unattended-upgrades'
+  - name: Patchem all (Debian-based)
+    command: 'unattended-upgrade'
+    when: ansible_os_family == 'Debian'
+
