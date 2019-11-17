@@ -31,4 +31,4 @@
     template:
       src: 'templates/50unattended-upgrades'
       dest: '/etc/apt/apt.conf.d/50unattended-upgrades'
-
+      when: ansible_os_family == 'Debian'
