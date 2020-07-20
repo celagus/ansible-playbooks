@@ -1,3 +1,7 @@
+# *** IMPORTANT DISCLAIMER ***
+# This API is for Lab purposes, DON'T USE IT FOR PRODUCTION, UNLESS IT WERE HARDENED!!!!
+#
+
 from flask import Flask, request
 from flask_restful import Resource, Api
 
