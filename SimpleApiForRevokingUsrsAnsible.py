@@ -1,5 +1,5 @@
 # *** IMPORTANT DISCLAIMER ***
-# This API is for Lab purposes, DON'T USE IT FOR PRODUCTION, UNLESS IT WERE HARDENED!!!!
+# This API is for Lab purposes, DON'T USE IT FOR PRODUCTION, UNLESS IT WAS HARDENED!!!!
 #
 
 from flask import Flask, request
