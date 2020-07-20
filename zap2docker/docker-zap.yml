@@ -1,0 +1,31 @@
+### Playbook to pull zap2docker from Docker-Hub, run it and register an issue on Jira
+### Created by Agustin Celano, distributed to community under Apache v2.0 License
+###
+- hosts: LOCALHOST
+  become: yes
+  ignore_errors: yes
+  vars:
+    TARGET: "http://10.20.30.42" #CONFIG ME
+  tasks:
+    - name: Get ZAP Container
+      command: docker pull owasp/zap2docker-stable
+
+    - name: Execute ZAP
+      command: docker run --network=host -t owasp/zap2docker-stable zap-baseline.py -t "{{ TARGET }}"
+      register: ZAP_OUT
+
+    - name: Include Jira vars
+      include_vars:
+        file: vaults/jira-keys #THIS IS A VAULT,YOU MUST SETUP PREVIOUSLY WITH VARS "jira_user", "jira_passwd" and "jira_uri"
+
+    - name: Create an issue
+      jira:
+        uri: "{{ jira_uri }}"
+        username: "{{ jira_user }}"
+        password: "{{ jira_passwd }}"
+        project: DEVSECOPS #CONFIG ME
+        operation: create
+        description: "{{ ZAP_OUT.stdout_lines }}"
+        summary: Creado con Ansible
+        issuetype: Task
+      register: issue

@@ -1,0 +1,15 @@
+### Playbook for deleting users in Linux, based on an external var "apiUser" (you can setup a microservice for using it)
+### usage: ansible-playbook del_user.yml --extra-vars apiUser=USR
+### Created by Agustin Celano, distributed to community under Apache v2.0 License
+###
+---
+- hosts: LINUX
+  diff: yes
+  become: yes
+  ignore_errors: yes
+  tasks:
+    - name: Chau user
+      user:
+        name: "{{ apiUser }}"
+        state: absent
+        remove: yes

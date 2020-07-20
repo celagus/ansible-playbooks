@@ -1,0 +1,23 @@
+### Playbook to add multiple users in SO Linux-based
+### Created by Agustin Celano, distributed to community under Apache v2.0 License
+###
+---
+- hosts: LINUX
+  check_mode: yes
+  become: yes
+  tasks:
+    - name: Add group
+      group:
+        name: users
+        state: present
+
+    - name: Add users (loop)
+      user:
+        name: "{{ item.name }}"
+        password: "{{ item.passwd }}"
+        state: present
+        groups: "{{ item.groups }}"
+      loop:
+         - { name: 'cristiano.ronaldo', groups: 'users', passwd: '$6$OIaGs0/6$eJF1Ce/LR.3VAlRzO5BIadILtIYUvGLXt3c1CdGCEULbxKo7NMjnQg5faMdJCYnJ8ry8fK0AGVyeFNvvz.YD7.'}
+         - { name: 'jsebastian.veron', groups: 'users', passwd: '$6$OIaGs0/6$eJF1Ce/LR.3VAlRzO5BIadILtIYUvGLXt3c1CdGCEULbxKo7NMjnQg5faMdJCYnJ8ry8fK0AGVyeFNvvz.YD7.'}
+         - { name: 'zinedine.zidane', groups: 'users', passwd: '$6$OIaGs0/6$eJF1Ce/LR.3VAlRzO5BIadILtIYUvGLXt3c1CdGCEULbxKo7NMjnQg5faMdJCYnJ8ry8fK0AGVyeFNvvz.YD7.'}

@@ -1,0 +1,51 @@
+### Playbook for revoking Linux users based in a HR list
+### Created by Agustin Celano, distributed to community under Apache v2.0 License
+###
+
+- hosts: LINUX
+  become: yes
+  vars:
+    REGEX: "^[\w]*\.[\w]*" #CONFIG ME!
+  tasks:
+    - name: Copiar el shadow remoto temporalmente
+      fetch:
+        src: /etc/shadow
+        dest: /tmp/{{ inventory_hostname }}.shadow
+        flat: yes
+
+    - name: Levantar nomina
+      set_fact: NOM="{{ lookup('file', '/etc/ansible/inputs/nomina.txt').splitlines() }}" #CONFIG ME!
+
+    - name: Levantar shadow
+      set_fact: SHDW="{{ lookup('file', '/tmp/{{ inventory_hostname }}.shadow').split('\n') }}"
+
+    - name: Setup users
+      set_fact: ID="{{ item.split(':')[0] | regex_search(REGEX) }}" 
+      with_items: "{{ SHDW }}"
+      register: USRS
+
+    - name: Armar lista
+      set_fact: USRS_LIST="{{ USRS.results | map(attribute='ansible_facts.ID') | select('match', (REGEX) ) | list }}"
+
+    - name: Cruce
+      set_fact: OUT={{ USRS_LIST | difference(NOM) }}
+
+    - name: Armar output
+      set_fact:
+        FOUT: "{{ (ansible_hostname+';' + OUT | string ) | replace('[]','') }}"
+
+    - name: Limpiar repo outputs
+      file:
+        path: "/etc/ansible/outputs/{{ ansible_hostname }}_fnomina.csv" #CONFIG ME!
+        state: absent
+      delegate_to: 127.0.0.1
+
+    - name: Escribir resultado
+      copy: "content='{{FOUT}}' dest='/etc/ansible/outputs/{{ ansible_hostname }}_fnomina.csv'" #CONFIG ME!
+      delegate_to: 127.0.0.1
+
+    - name: Limpiar shadow temp
+      file:
+        path: /tmp/{{ inventory_hostname }}.shadow
+        state: absent
+      delegate_to: 127.0.0.1
